@@ -20,4 +20,9 @@ It's easy to combine this project into your project to protect your project from
 To compile this program, you will need a C compiler that supports Windows API functions, such as MinGW or Microsoft Visual C++. You can compile the program using the following command:
 
 ```bash
-g++ -shared -I"%JAVA_HOME%\include" -I"%JAVA_HOME%\include\win32" antidebug.c -o antidebug.dll 
+g++ -shared -I"%JAVA_HOME%\include" -I"%JAVA_HOME%\include\win32" antidebug.c -o antidebug.dll
+```
+
+## Recommendation
+
+It is recommended to use **additional code virtualization/obfuscation** on your Java project.
