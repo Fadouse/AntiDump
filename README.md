@@ -5,7 +5,6 @@ This repository contains a C program in JNI(Java Native Interface) demonstrating
 
 ## Features
 
-- **Time Delay Checks**: Verifies if the execution time exceeds a certain threshold, indicating the presence of a debugger.
 - **Virtual Machine Detection**: Checks if the program is running inside a virtual machine by examining the Local Descriptor Table (LDT).
 - **Debugger Presence Check**: Detects if a debugger is currently attached to the process.
 - **Memory Dump Prevention**: Attempts to prevent memory dumps by changing the memory protection of the process.
