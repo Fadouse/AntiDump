@@ -1,28 +1,7 @@
-#include "verify_equipment_AntiDebugging.h"
+#include "example_package_AntiDebugging.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
-#include <time.h>
-
-#define TIME_THRESHOLD 100 // 延时设定，预防调试
-
-void check_time_delay(clock_t start_time) {
-    clock_t end_time = clock();
-    double elapsed_time = ((double) (end_time - start_time)) / CLOCKS_PER_SEC * 1000;
-    if (elapsed_time > TIME_THRESHOLD) {
-        exit(1);
-    }
-}
-
-long getCurrentTimestamp() {
-    // 获取当前时间
-    time_t currentTime = time(NULL);
-    
-    // 将 time_t 类型转换为 long 类型
-    long currentTimeLong = (long)currentTime;
-    
-    return currentTimeLong;
-}
 
 BOOL IsVirtualPC_LDTCheck() {
     unsigned short ldt_addr = 0;
@@ -63,16 +42,11 @@ void preventThreadInjection() {
     VirtualProtectEx(hProcess, NULL, 0, PAGE_NOACCESS, &oldProtect);
 }
 
-JNIEXPORT jlong JNICALL Java_love_LI_LI(JNIEnv *env, jobject obj, jint a, jint b) {
+JNIEXPORT jvoid JNICALL Java_love_LI_LI(JNIEnv *env, jobject obj, jint a, jint b) {
     if(IsVirtualPC_LDTCheck())
         exit(1);
-    clock_t start_time = clock();
     detectDebugger(); 
     preventMemoryDump();
     preventRemoteDebug();
     preventThreadInjection(); 
-    check_time_delay(start_time);
-    jint result = a + b;
-    check_time_delay(start_time);
-    return getCurrentTimestamp();
 }
