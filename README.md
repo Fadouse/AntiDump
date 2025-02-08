@@ -10,6 +10,7 @@ This repository contains a C program in JNI(Java Native Interface) demonstrating
 - **Memory Dump Prevention**: Attempts to prevent memory dumps by changing the memory protection of the process.
 - **Remote Debugging Prevention**: Blocks remote debugging by modifying process information.
 - **Thread Injection Prevention**: Prevents thread injection attacks by modifying memory protection.
+- **JDWP Interface Monitoring**: Monitors and disables the Java Debug Wire Protocol (JDWP) to prevent remote attachments.
 
 ## Customize
 
@@ -22,6 +23,10 @@ To compile this program, you will need a C compiler that supports Windows API fu
 ```bash
 g++ -shared -I"%JAVA_HOME%\include" -I"%JAVA_HOME%\include\win32" antidebug.c -o antidebug.dll
 ```
+
+## License
+
+This project is licensed under the GNU General Public License v3.0. See the LICENSE file for details.
 
 ## Recommendation
 
