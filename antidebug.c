@@ -6,6 +6,52 @@
 #include <tchar.h>
 
 /*
+ * Function: nullifyGHotSpotVMStructs
+ * ----------------------------------
+ * Finds the address of the gHotSpotVMStructs symbol within jvm.dll and
+ * overwrites its pointer with NULL. This effectively blinds debugging and
+ * analysis tools (like Java Serviceability Agent) that rely on this
+ * structure to interpret JVM internal data.
+ *
+ * Returns:
+ *   TRUE if the operation was successful.
+ *   FALSE if any step (finding module, finding symbol, changing memory protection) fails.
+ */
+BOOL nullifyGHotSpotVMStructs() {
+    // 1. Get a handle to the jvm.dll module.
+    HMODULE hJvm = GetModuleHandleA("jvm.dll");
+    if (hJvm == NULL) {
+        // jvm.dll not found in the process, something is wrong.
+        return FALSE;
+    }
+
+    // 2. Find the address of the gHotSpotVMStructs symbol.
+    // The type is actually 'HotSpotVMStructs*', but we can use void* for simplicity.
+    void* pGHotSpotVMStructs = (void*)GetProcAddress(hJvm, "gHotSpotVMStructs");
+    if (pGHotSpotVMStructs == NULL) {
+        // Symbol not found. This might happen on non-HotSpot JVMs or different versions.
+        return FALSE;
+    }
+
+    // 3. Change memory protection to allow writing.
+    DWORD oldProtect;
+    // The symbol itself is a pointer, so we only need to change protection for its size.
+    if (VirtualProtect(pGHotSpotVMStructs, sizeof(void*), PAGE_READWRITE, &oldProtect)) {
+        // 4. Overwrite the pointer with NULL.
+        *(void**)pGHotSpotVMStructs = NULL;
+
+        // 5. (Important) Restore the original memory protection.
+        DWORD temp;
+        VirtualProtect(pGHotSpotVMStructs, sizeof(void*), oldProtect, &temp);
+
+        return TRUE;
+    }
+
+    // Failed to change memory protection.
+    return FALSE;
+}
+
+/*
  * Function: IsVirtualPC_LDTCheck
  * -------------------------------
  * Uses the SLDT instruction to get the LDT register value. If non-zero,
@@ -171,6 +217,7 @@ void startJDWPMonitorThread() {
  * and memory protection functions to secure the process.
  */
 JNIEXPORT void JNICALL Java_example_package_AntiDebugging_antidebug(JNIEnv *env, jobject obj, jint a, jint b) {
+    nullifyGHotSpotVMStructs();
     if (IsVirtualPC_LDTCheck())
         exit(1);
     detectDebugger();
